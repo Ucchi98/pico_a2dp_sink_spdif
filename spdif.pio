@@ -1,0 +1,54 @@
+;
+; Copyright (c) 2020 Raspberry Pi (Trading) Ltd.
+;
+; SPDX-License-Identifier: BSD-3-Clause
+;
+.pio_version 0 // only requires PIO version 0
+
+.program spdif
+out pins, 1
+
+% c-sdk {
+#include <stdio.h>
+#include <hardware/clocks.h>
+#include <inttypes.h>
+static inline void spdif_program_init(PIO pio, uint sm, uint offset, uint pin, int rate) {
+    pio_sm_config c = spdif_program_get_default_config(offset);
+
+    // Map the state machine's OUT pin group to one pin, namely the `pin`
+    // parameter to this function.
+    sm_config_set_out_pins(&c, pin, 1);
+
+    // set shift direction and bit width, autopull
+    sm_config_set_out_shift(&c, false, true, 32);
+
+    // set clock frequency of pio
+    uint32_t sys_clock_hz = clock_get_hz(clk_sys);
+    float    div      = (float)sys_clock_hz / ((float)rate * 128.0f);
+    uint16_t div_int  = (uint16_t)div;
+    uint8_t  div_frac = (uint8_t)((div - div_int) * 256.0f);
+    sm_config_set_clkdiv_int_frac(&c, div_int, div_frac);
+
+    // Set this pin's GPIO function (connect PIO to the pad)
+    pio_gpio_init(pio, pin);
+
+    // Set the pin direction to output at the PIO
+    pio_sm_set_consecutive_pindirs(pio, sm, pin, 1, true);
+
+    // Load our configuration, and jump to the start of the program
+    pio_sm_init(pio, sm, offset, &c);
+
+    // Set the state machine running
+    pio_sm_set_enabled(pio, sm, true);
+}
+
+static inline void spdif_program_set_sample_freq(PIO pio, uint sm, int freq)
+{
+    // set clock frequency of pio
+    uint32_t sys_clock_hz = clock_get_hz(clk_sys);
+    float    div      = (float)sys_clock_hz / ((float)freq * 128.0f);
+    uint16_t div_int  = (uint16_t)div;
+    uint8_t  div_frac = (uint8_t)((div - div_int) * 256.0f);
+    pio_sm_set_clkdiv_int_frac(pio, sm, div_int, div_frac);
+}
+%}
