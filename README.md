@@ -13,8 +13,8 @@ a2dp_sink_demoのI2S出力をS/PDIF出力に変更したものです。
 ### Usage
 
 1. 必要なもの
-  1. Raspberry Pi Pico2 W / Pico2 WH
-  2. 光デジタル通信コネクタ（例：[PLT133/T10W](https://akizukidenshi.com/catalog/g/g109598/)
+    1. Raspberry Pi Pico2 W / Pico2 WH
+    2. 光デジタル通信コネクタ（例：[PLT133/T10W](https://akizukidenshi.com/catalog/g/g109598/)
 2. 配線
   ![image](pico_a2dp_sink_spdif_wire2.jpg)
 
